@@ -2,6 +2,7 @@ package irispgx
 
 import (
 	"fmt"
+
 	"github.com/jackc/pgx"
 	"github.com/kataras/iris"
 )
@@ -18,14 +19,21 @@ func main() {
 }
 
 func (m *Middleware) Serve(ctx *iris.Context) {
-	conn, err := m.Pool.Acquire()
-	if err != nil {
-		fmt.Println("Error acquiring pool in: ", ctx.Path())
-	} else {
-		ctx.Set("pgxConn", conn)
-		ctx.Set("pgxConnPool", m.Pool)
-		ctx.Next()
+	if m.Config.AttachPool {
+		ctx.Set(m.Config.PoolCtxKey, m.Pool)
 	}
+
+	if m.Config.AttachConn {
+		conn, err := m.Pool.Acquire()
+		if err != nil {
+			fmt.Println("Error acquiring pool in: ", ctx.Path())
+		} else {
+			fmt.Print("Setting the Connection")
+			ctx.Set(m.Config.ConnCtxKey, conn)
+		}
+	}
+	ctx.Next()
+
 	//_, ok := ctx.Get("pgx").(pgx.Conn)
 }
 
