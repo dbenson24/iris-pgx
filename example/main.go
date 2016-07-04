@@ -26,5 +26,5 @@ func main() {
 		conn := c.Get("PGXCONN").(*pgx.Conn)
 		c.SetBodyString(strconv.FormatBool(conn.IsAlive()))
 	})
-	iris.Listen(":8080")
+	iris.Listen("0.0.0.0:8080")
 }
