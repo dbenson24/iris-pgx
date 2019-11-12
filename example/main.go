@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/dbenson24/iris-pgx"
 	"github.com/jackc/pgx"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
 func main() {
@@ -21,10 +20,11 @@ func main() {
 	c.AttachConn = true
 	c.AttachPool = false
 	ConnMiddleware := irispgx.New(c)
-	iris.Use(ConnMiddleware)
-	iris.Get("/test", func(c *iris.Context) {
-		conn := c.Get("PGXCONN").(*pgx.Conn)
-		c.SetBodyString(strconv.FormatBool(conn.IsAlive()))
+	app := iris.New()
+	app.Use(ConnMiddleware.Serve)
+	app.Get("/test", func(c iris.Context) {
+		conn := c.Values().Get("PGXCONN").(*pgx.Conn)
+		c.Writef("%s",  conn.IsAlive())
 	})
-	iris.Listen("0.0.0.0:8080")
+	app.Run(iris.Addr(":8080"))
 }
