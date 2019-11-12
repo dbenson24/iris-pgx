@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
-type errorHandler func(*iris.Context, string)
+type errorHandler func(iris.Context, string)
 
 type Middleware struct {
 	Config Config
@@ -18,9 +18,9 @@ func main() {
 	fmt.Println("vim-go")
 }
 
-func (m *Middleware) Serve(ctx *iris.Context) {
+func (m *Middleware) Serve(ctx iris.Context) {
 	if m.Config.AttachPool {
-		ctx.Set(m.Config.PoolCtxKey, m.Pool)
+		ctx.Values().Set(m.Config.PoolCtxKey, m.Pool)
 	}
 
 	if m.Config.AttachConn {
@@ -29,7 +29,7 @@ func (m *Middleware) Serve(ctx *iris.Context) {
 			fmt.Println("Error acquiring pool in: ", ctx.Path())
 		} else {
 			fmt.Print("Setting the Connection")
-			ctx.Set(m.Config.ConnCtxKey, conn)
+			ctx.Values().Set(m.Config.ConnCtxKey, conn)
 		}
 	}
 	ctx.Next()
